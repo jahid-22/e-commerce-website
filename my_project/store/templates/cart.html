@@ -1,0 +1,179 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block main-banner %}{% endblock main-banner %}
+
+
+{% block main %}
+
+<section class="section-content padding-y bg">
+	<div class="container">
+	
+	<!-- ============================ COMPONENT 1 ================================= -->
+	
+	<div class="row">
+		<aside class="col-lg-9">
+	<div class="card">
+	<table class="table table-borderless table-shopping-cart">
+	<thead class="text-muted">
+	<tr class="small text-uppercase">
+	  <th scope="col">Product</th>
+	  <th scope="col" width="120">Quantity</th>
+	  <th scope="col" width="120">Price</th>
+	  <th scope="col" class="text-right" width="200"> </th>
+	</tr>
+	</thead>
+	<tbody>
+
+		{% for prod in get_single_product %}
+	<tr id="remove-row">
+		<td>
+			<figure class="itemside align-items-center">
+				<div class="aside"><img src="{{prod.product.img.url}}" class="img-sm"></div>
+				<figcaption class="info">
+					<a href="{{prod.product.get_absolute_url}}" class="title text-dark">{{prod.product.name}}</a>
+					<p class="text-muted small">Matrix: 25 Mpx <br> Brand: Canon</p>
+				</figcaption>
+			</figure>
+		</td>
+		<td> 
+			<!-- col.// -->
+						<div class="col"> 
+							<div class="input-group input-spinner">
+
+								<a class="btn btn-light button-minus" data-pid="{{prod.id}}">
+									<i class="fa fa-minus"></i>
+								</a>
+								<span class="btn btn-sm btn-quantity" >{{prod.quantity}}</span>
+
+								<a class="btn btn-light button-plus" data-pid="{{prod.id}}">
+									<i class="fa fa-plus"></i>
+								</a>
+
+							</div> <!-- input-group.// -->
+						</div> <!-- col.// -->
+		</td>
+
+		<td> 
+			<div class="price-wrap"> 
+				<var class="price">$1156.00</var> 
+				<small class="text-muted"> TK {{prod.product.selling_price}} each </small> 
+			</div> <!-- price-wrap .// -->
+		</td>
+		<td class="text-right"> 
+		<a data-pid="{{prod.id}}" class="btn btn-danger remove-button">Remove</a>
+		</td>
+	</tr>
+	{% endfor %}
+
+	</tbody>
+	</table>
+	</div> <!-- card.// -->
+	
+		</aside> <!-- col.// -->
+		<aside class="col-lg-3">
+	
+			<div class="card">
+			<div class="card-body">
+				<dl class="dlist-align">
+				  <dt>Total price:</dt>
+				  <dd id="total" class="text-right total-price">${{amount}}</dd>				</dl>
+				<dl class="dlist-align">
+				  <dt>Shipping Fee:</dt>
+				  <dd class="text-right"> $100</dd>
+				</dl>
+				<dl class="dlist-align">
+				  <dt>Total:</dt>
+				  <dd id="total-price" class="text-right text-dark b total"><strong>${{total_amount}}</strong></dd>				</dl>
+				<hr>
+				<p class="text-center mb-3">
+					<img src="./images/misc/payments.png" height="26">
+				</p>
+				<a href="./place-order.html" class="btn btn-primary btn-block"> Checkout </a>
+				<a href="./store.html" class="btn btn-light btn-block">Continue Shopping</a>
+			</div> <!-- card-body.// -->
+			</div> <!-- card.// -->
+	
+	</aside> <!-- col.// -->
+	
+	
+	</div> <!-- row.// -->
+	<!-- ============================ COMPONENT 1 END .// ================================= -->
+	
+	</div> <!-- container .//  -->
+	</section>
+	<!-- ========================= SECTION CONTENT END// ========================= -->
+	
+
+	{% comment %} ajax start {% endcomment %}
+	<script>
+
+		// plus cart
+		$('.button-plus').click(function () {
+			let pid = $(this).attr('data-pid').toString();
+			let quantity = $(this).siblings('.btn-quantity');
+			let total = $('#total');
+			let total_price = $('#total-price');
+
+			$.ajax({
+			  type: 'GET',
+			  url: '/pluscart',
+			  data: {
+				prod_id: pid
+			  },
+			  success: function(data) {
+				quantity.text(data.quantity); 
+				total_price.text(data.total_amount)
+				total.text(data.amount)
+
+			  }
+			});
+		  });
+
+		// minus cart
+		$('.button-minus').click(function () {
+			let pid = $(this).attr('data-pid').toString();
+			let quantity = $(this).siblings('.btn-quantity');
+			let total = $('#total');
+			let total_price = $('#total-price');
+
+			$.ajax({
+			  type: 'GET',
+			  url: '/minuscart',
+			  data: {
+				prod_id: pid
+			  },
+			  success: function(data) {
+				quantity.text(data.quantity); 
+				total_price.text(data.total_amount)
+				total.text(data.amount)
+
+			  }
+			});
+		  });
+		  
+
+		// remove cart
+		$('.remove-button').click(function () {
+			let pid = $(this).attr('data-pid').toString();
+			let total = $('#total');
+			let total_price = $('#total-price');
+
+			$.ajax({
+			  type: 'GET',
+			  url: '/removecart',
+			  data: {
+				prod_id: pid
+			  },
+			  success: function(data) {
+				document.getElementById('remove-row').remove()
+
+				total_price.text(data.total_amount)
+				total.text(data.amount)
+
+			  }
+			});
+		  });
+		  
+	</script>
+
+{% endblock main %}
